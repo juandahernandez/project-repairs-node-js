@@ -4,7 +4,12 @@ const express = require('express');
 const {
   userExists
 } = require('../middlewares/users.middlewares');
+const {
+  createUserValidator,
+  validateResult
+} = require('../middlewares/validations.middlewares');
 
+// controllers
 const {
   getAllUsers,
   getUserById,
@@ -19,7 +24,12 @@ router.get('/', getAllUsers);
 
 router.get('/:id', userExists, getUserById);
 
-router.post('/', createNewUser);
+router.post(
+  '/',
+  createUserValidator,
+  validateResult,
+  createNewUser
+);
 
 router.patch('/:id', userExists, updateUser);
 

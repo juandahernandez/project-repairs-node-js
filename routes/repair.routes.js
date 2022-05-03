@@ -4,6 +4,10 @@ const express = require('express');
 const {
   repairExist
 } = require('../middlewares/repairs.middlewares');
+const {
+  createRepairValidator,
+  validateResult
+} = require('../middlewares/validations.middlewares');
 
 const {
   getAllRepairs,
@@ -19,7 +23,12 @@ router.get('/', getAllRepairs);
 
 router.get('/:id', repairExist, getRepairById);
 
-router.post('/', createNewDate);
+router.post(
+  '/',
+  createRepairValidator,
+  validateResult,
+  createNewDate
+);
 
 router.patch('/:id', updateRepair);
 
