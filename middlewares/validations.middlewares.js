@@ -38,11 +38,11 @@ exports.createRepairValidator = [
     .withMessage('Date cannot be empty')
     .isDate()
     .withMessage('Must be a valid date'),
-  body('status')
+  body('comments')
     .isString()
-    .withMessage('Status must be a string')
+    .withMessage('Comments must be a string')
     .notEmpty()
-    .withMessage('Status cannot be empty')
+    .withMessage('Comments cannot be empty')
 ];
 
 exports.validateResult = catchAsync(
