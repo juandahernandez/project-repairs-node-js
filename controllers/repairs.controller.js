@@ -34,14 +34,14 @@ exports.getRepairById = catchAsync(
 
 exports.createNewDate = catchAsync(
   async (req, res, next) => {
-    const { date, computerNumber, comments, userId } =
-      req.body;
+    const { sessionUser } = req;
+    const { date, comments } = req.body;
 
     const newRepair = await Repair.create({
       date,
       computerNumber: Math.floor(Math.random() * 1000),
       comments,
-      userId
+      userId: sessionUser.id
     });
 
     res.status(201).json({

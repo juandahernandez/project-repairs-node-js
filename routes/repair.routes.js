@@ -2,12 +2,17 @@ const express = require('express');
 
 // middlewares
 const {
-  repairExist
+  repairExist,
+  protectEmployee
 } = require('../middlewares/repairs.middlewares');
 const {
   createRepairValidator,
   validateResult
 } = require('../middlewares/validations.middlewares');
+
+const {
+  protectToken
+} = require('../middlewares/users.middlewares');
 
 const {
   getAllRepairs,
@@ -19,9 +24,7 @@ const {
 
 const router = express.Router();
 
-router.get('/', getAllRepairs);
-
-router.get('/:id', repairExist, getRepairById);
+router.use(protectToken);
 
 router.post(
   '/',
@@ -30,7 +33,13 @@ router.post(
   createNewDate
 );
 
-router.patch('/:id', updateRepair);
+router.use(protectEmployee);
+
+router.get('/', getAllRepairs);
+
+router.get('/:id', repairExist, getRepairById);
+
+router.patch('/:id', repairExist, updateRepair);
 
 router.delete('/:id', repairExist, deleteRepair);
 

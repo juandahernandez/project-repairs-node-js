@@ -1,3 +1,6 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 // utils
 const { filterObj } = require('../utils/filterObj');
 const { catchAsync } = require('../utils/catchAsync');
@@ -10,7 +13,8 @@ const { Repair } = require('../models/repairs.model');
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.findAll({
     where: { status: 'active' },
-    include: [{ model: Repair }]
+    include: [{ model: Repair }],
+    attributes: { exclude: ['password'] }
   });
 
   res.status(200).json({
@@ -32,12 +36,17 @@ exports.createNewUser = catchAsync(
   async (req, res, next) => {
     const { name, email, password, role } = req.body;
 
+    const salt = await bcrypt.genSalt(12);
+    const hashPassword = await bcrypt.hash(password, salt);
+
     const newUser = await User.create({
       name,
       email,
-      password,
+      password: hashPassword,
       role
     });
+
+    newUser.password = undefined;
 
     res.status(201).json({
       status: 'success',
@@ -47,19 +56,9 @@ exports.createNewUser = catchAsync(
 );
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
+  const { user } = req;
 
   const data = filterObj(req.body, 'name', 'email');
-
-  const user = await User.findOne({
-    where: { id, status: 'active' }
-  });
-
-  if (!user) {
-    return next(
-      new AppError(404, 'User not found given that id')
-    );
-  }
 
   await user.update({ ...data });
 
@@ -72,4 +71,36 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
   await user.update({ status: 'delete' });
 
   res.status(204).json({ status: 'success' });
+});
+
+exports.loginUser = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({
+    where: { email, status: 'active' }
+  });
+
+  if (
+    !user ||
+    !(await bcrypt.compare(password, user.password))
+  ) {
+    return next(
+      new AppError(400, 'Credentials are invalid')
+    );
+  }
+
+  const token = await jwt.sign(
+    { id: user.id },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN
+    }
+  );
+
+  user.password = undefined;
+
+  res.status(200).json({
+    status: 'success',
+    data: { token, user }
+  });
 });
