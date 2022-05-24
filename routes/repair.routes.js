@@ -14,6 +14,10 @@ const {
   protectToken
 } = require('../middlewares/users.middlewares');
 
+// utils
+const { upload } = require('../utils/multer');
+
+//controllers
 const {
   getAllRepairs,
   getRepairById,
@@ -28,6 +32,7 @@ router.use(protectToken);
 
 router.post(
   '/',
+  upload.single('repairImg'),
   createRepairValidator,
   validateResult,
   createNewDate
