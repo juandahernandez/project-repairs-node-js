@@ -21,18 +21,14 @@ exports.getAllRepairs = catchAsync(
       include: [{ model: User }]
     });
 
-    // Map async:utilizará esta técnica cada vez que necesite algunas operaciones asíncronas dentro de una matriz
     const repairsPromises = repairs.map(async (repair) => {
-      // Crea firebase img ref y obtenga la ruta completa
       const imgRef = ref(storage, repair.imgPath);
       const url = await getDownloadURL(imgRef);
 
-      // Actualizar la propiedad profileImgUrl del usuario
       repair.imgPath = url;
       return repair;
     });
 
-    // Resolver cada promesa que nos dio el map ([ Promise { <pending> }, Promise { <pending> } ])
     const repairsResolved = await Promise.all(
       repairsPromises
     );
