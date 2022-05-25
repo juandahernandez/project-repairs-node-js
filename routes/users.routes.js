@@ -20,7 +20,6 @@ const {
   deleteUser,
   loginUser
 } = require('../controllers/users.controller');
-const { Router } = require('express');
 
 const router = express.Router();
 
